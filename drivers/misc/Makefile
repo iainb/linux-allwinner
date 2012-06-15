@@ -52,3 +52,4 @@ obj-$(CONFIG_MAX8997_MUIC)	+= max8997-muic.o
 obj-$(CONFIG_SUN4I_VIBRATOR)	+= sun4i-vibrator.o
 obj-$(CONFIG_SUN4I_GPIO_UGLY)	+= sun4i-gpio.o
 obj-$(CONFIG_SUNXI_DBGREG)		+= sunxi-dbgreg.o
+obj-$(CONFIG_SUNXI_PLAT)	+= sunxi-plat.o
