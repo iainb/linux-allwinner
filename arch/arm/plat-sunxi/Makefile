@@ -1,1 +1,1 @@
-obj-y := common.o sys_config.o
+obj-y := sys_config.o
