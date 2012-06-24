@@ -129,4 +129,7 @@ config DEBUG_S3C_UART
 	  The uncompressor code port configuration is now handled
 	  by CONFIG_S3C_LOWLEVEL_UART_PORT.
 
+config HAVE_MMIOTRACE_SUPPORT
+    def_bool y
+
 endmenu
