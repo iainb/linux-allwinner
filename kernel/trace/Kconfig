@@ -450,7 +450,7 @@ config EVENT_TRACE_TEST_SYSCALLS
 
 config MMIOTRACE
 	bool "Memory mapped IO tracing"
-	depends on HAVE_MMIOTRACE_SUPPORT && PCI
+	depends on HAVE_MMIOTRACE_SUPPORT
 	select GENERIC_TRACER
 	help
 	  Mmiotrace traces Memory Mapped I/O access and is meant for

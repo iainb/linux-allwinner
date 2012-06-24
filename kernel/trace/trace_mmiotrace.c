@@ -8,7 +8,11 @@
 
 #include <linux/kernel.h>
 #include <linux/mmiotrace.h>
+
+#ifdef CONFIG_PCI
 #include <linux/pci.h>
+#endif
+
 #include <linux/slab.h>
 #include <linux/time.h>
 
@@ -18,7 +22,11 @@
 #include "trace_output.h"
 
 struct header_iter {
+    #ifdef CONFIG_PCI
 	struct pci_dev *dev;
+    #else
+    void *dev;
+    #endif
 };
 
 static struct trace_array *mmio_trace_array;
@@ -59,6 +67,7 @@ static void mmio_trace_start(struct trace_array *tr)
 	mmio_reset_data(tr);
 }
 
+#ifdef CONFIG_PCI
 static int mmio_print_pcidev(struct trace_seq *s, const struct pci_dev *dev)
 {
 	int ret = 0;
@@ -93,12 +102,15 @@ static int mmio_print_pcidev(struct trace_seq *s, const struct pci_dev *dev)
 		ret += trace_seq_printf(s, " \n");
 	return ret;
 }
+#endif
 
 static void destroy_header_iter(struct header_iter *hiter)
 {
 	if (!hiter)
 		return;
+    #ifdef CONFIG_PCI
 	pci_dev_put(hiter->dev);
+    #endif
 	kfree(hiter);
 }
 
@@ -112,8 +124,13 @@ static void mmio_pipe_open(struct trace_iterator *iter)
 	hiter = kzalloc(sizeof(*hiter), GFP_KERNEL);
 	if (!hiter)
 		return;
-
+    
+    #ifdef CONFIG_PCI
 	hiter->dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, NULL);
+    #else
+    hiter->dev = NULL;
+    #endif
+
 	iter->private = hiter;
 }
 
@@ -157,8 +174,12 @@ static ssize_t mmio_read(struct trace_iterator *iter, struct file *filp,
 	if (!hiter)
 		return 0;
 
+    #ifdef CONFIG_PCI
 	mmio_print_pcidev(s, hiter->dev);
 	hiter->dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, hiter->dev);
+    #else
+    hiter->dev = NULL;
+    #endif
 
 	if (!hiter->dev) {
 		destroy_header_iter(hiter);
