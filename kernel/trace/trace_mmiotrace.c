@@ -22,11 +22,11 @@
 #include "trace_output.h"
 
 struct header_iter {
-    #ifdef CONFIG_PCI
+	#ifdef CONFIG_PCI
 	struct pci_dev *dev;
-    #else
-    void *dev;
-    #endif
+	#else
+	void *dev;
+	#endif
 };
 
 static struct trace_array *mmio_trace_array;
@@ -108,9 +108,9 @@ static void destroy_header_iter(struct header_iter *hiter)
 {
 	if (!hiter)
 		return;
-    #ifdef CONFIG_PCI
+	#ifdef CONFIG_PCI
 	pci_dev_put(hiter->dev);
-    #endif
+	#endif
 	kfree(hiter);
 }
 
@@ -125,11 +125,11 @@ static void mmio_pipe_open(struct trace_iterator *iter)
 	if (!hiter)
 		return;
     
-    #ifdef CONFIG_PCI
+	#ifdef CONFIG_PCI
 	hiter->dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, NULL);
-    #else
-    hiter->dev = NULL;
-    #endif
+	#else
+	hiter->dev = NULL;
+	#endif
 
 	iter->private = hiter;
 }
@@ -174,12 +174,12 @@ static ssize_t mmio_read(struct trace_iterator *iter, struct file *filp,
 	if (!hiter)
 		return 0;
 
-    #ifdef CONFIG_PCI
+	#ifdef CONFIG_PCI
 	mmio_print_pcidev(s, hiter->dev);
 	hiter->dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, hiter->dev);
-    #else
-    hiter->dev = NULL;
-    #endif
+	#else
+	hiter->dev = NULL;
+	#endif
 
 	if (!hiter->dev) {
 		destroy_header_iter(hiter);
