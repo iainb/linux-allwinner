@@ -14,6 +14,7 @@
 #include <linux/hardirq.h>
 #include <linux/init.h>
 #include <linux/kprobes.h>
+#include <linux/mmiotrace.h>
 #include <linux/uaccess.h>
 #include <linux/page-flags.h>
 #include <linux/sched.h>
@@ -40,6 +41,19 @@ static inline int fsr_fs(unsigned int fsr)
 }
 
 #ifdef CONFIG_MMU
+/*
+ * Returns 0 if mmiotrace is disabled, or if the fault is not
+ * handled by mmiotrace:
+ */
+static inline int __kprobes
+kmmio_fault(struct pt_regs *regs, unsigned long addr)
+{
+	if (unlikely(is_kmmio_active()))
+		if (kmmio_handler(regs, addr) == 1)
+			return -1;
+	return 0;
+}
+
 
 #ifdef CONFIG_KPROBES
 static inline int notify_page_fault(struct pt_regs *regs, unsigned int fsr)
@@ -278,6 +292,10 @@ do_page_fault(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	struct task_struct *tsk;
 	struct mm_struct *mm;
 	int fault, sig, code;
+
+	if (unlikely(kmmio_fault(regs,addr))) {
+		return 0;
+	}
 
 	if (notify_page_fault(regs, fsr))
 		return 0;

@@ -25,6 +25,7 @@
 #include <linux/mm.h>
 #include <linux/vmalloc.h>
 #include <linux/io.h>
+#include <linux/mmiotrace.h>
 
 #include <asm/cputype.h>
 #include <asm/cacheflush.h>
@@ -194,6 +195,7 @@ void __iomem * __arm_ioremap_pfn_caller(unsigned long pfn,
 	int err;
 	unsigned long addr;
  	struct vm_struct * area;
+	void __iomem *ret_addr;
 
 	/*
 	 * High mappings must be supersection aligned
@@ -241,8 +243,11 @@ void __iomem * __arm_ioremap_pfn_caller(unsigned long pfn,
  		return NULL;
  	}
 
+	ret_addr = (void __iomem *) (offset + addr);
+	mmiotrace_ioremap(__pfn_to_phys(pfn),size,ret_addr);
+
 	flush_cache_vmap(addr, addr + size);
-	return (void __iomem *) (offset + addr);
+	return ret_addr;
 }
 
 void __iomem *__arm_ioremap_caller(unsigned long phys_addr, size_t size,

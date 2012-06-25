@@ -79,6 +79,17 @@ static struct list_head *kmmio_page_list(unsigned long page)
 /* Accessed per-cpu */
 static DEFINE_PER_CPU(struct kmmio_context, kmmio_ctx);
 
+
+int kmmio_handler(struct pt_regs *regs, unsigned long addr)
+{
+	struct kmmio_context *ctx;
+	struct kmmio_fault_page *faultpage;
+	int ret = 0; /* default to fault not handled */
+
+	return ret;
+}	
+
+
 /*
  * Remove a kmmio probe. You have to synchronize_rcu() before you can be
  * sure that the callbacks will not be called anymore. Only after that

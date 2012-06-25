@@ -92,6 +92,36 @@ static bool is_enabled(void)
 	return atomic_read(&mmiotrace_enabled);
 }
 
+void mmiotrace_ioremap(resource_size_t offset, unsigned long size,
+						void __iomem *addr)
+{
+	if (!is_enabled()) /* recheck and proper locking in *_core() */
+		return;
+
+	pr_info("ioremap_*(0x%llx, 0x%lx) = %p\n",
+		 (unsigned long long)offset, size, addr);
+	if ((filter_offset) && (offset != filter_offset))
+		return;
+	//ioremap_trace_core(offset, size, addr);
+}
+
+int mmiotrace_printk(const char *fmt, ...)
+{
+	int ret = 0;
+	va_list args;
+	unsigned long flags;
+	va_start(args, fmt);
+
+	spin_lock_irqsave(&trace_lock, flags);
+	if (is_enabled())
+		ret = mmio_trace_printk(fmt, args);
+	spin_unlock_irqrestore(&trace_lock, flags);
+
+	va_end(args);
+	return ret;
+}
+EXPORT_SYMBOL(mmiotrace_printk);
+
 static void clear_trace_list(void)
 {
 	struct remap_trace *trace;
@@ -117,6 +147,10 @@ static void clear_trace_list(void)
 	}
 }
 
+/*
+ * leave handling multiple cpus until later
+ * x86 implementation handles this. 	
+ */
 static void enter_uniprocessor(void)
 {
 	if (num_online_cpus() > 1)
